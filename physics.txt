@@ -13,3 +13,9 @@ x speed      | y Vel  | Holding Grav | Falling Grav |
 < 1          | 4.0    | 0.125        | 0.4375
 > 1 < 2.3125 | 4.0    | 0.1171875    | 0.375
 > 2.3125     | 5.0    | 0.15625      | 0.5625
+
+
+Air physics
+x speed  | Gain momentum   | Lose momentum   |
+< 1.5625 | 0.03515265      | 0.0546875       |
+> 1.5625 | 0.0546875       | 0.05078125      |
