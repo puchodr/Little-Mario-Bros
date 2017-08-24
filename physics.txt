@@ -1,0 +1,15 @@
+
+All values are in pixels per frame
+
+Min walk Velocity = 0.07421875   Max walk speed = 1.5625
+Walking accel = 0.037109375      Max walk speed (underwater) = 1100
+Running accel = 0.0546875        Max run speed = 2.5625
+Release decel = 0.05078125
+Skidding decel = 0.1015625       Skid Turn speed = 0.5625
+
+Terminal Velocity = 4.5
+
+x speed      | y Vel  | Holding Grav | Falling Grav |
+< 1          | 4.0    | 0.125        | 0.4375
+> 1 < 2.3125 | 4.0    | 0.1171875    | 0.375
+> 2.3125     | 5.0    | 0.15625      | 0.5625
