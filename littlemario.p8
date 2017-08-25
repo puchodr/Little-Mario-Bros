@@ -55,8 +55,14 @@ player =
   runaccel = 0.0546875*2,
   maxwalk=1.5625,
   maxrun=2.5625,
-  decel=0.05078125,
-  skiddecel = 0.1015625,
+  grounddecel=0.05078125*2,
+  skiddecel = 0.1015625*2,
+
+  -- Momentum changes in the x direction
+  airaccel1=0.03515265*2,
+  airaccel2=0.0546875*2,
+  airdecel1=0.0546875*2,
+  airdecel2=0.05078125*2,
 
   --animation variables
   initialsprite = 32,
@@ -83,6 +89,31 @@ function updateplayer()
     player.isrunning = false
   end
 
+  if player.isgrounded then
+    player_ground_movement()
+  else
+    --player_air_movement()
+    player_ground_movement()
+  end
+
+  --move the player left/right
+  if not player.isdead then
+    player.x+=player.dx
+  end
+
+  if player.isdead then
+    player.flipsprite = false
+    player.sprite = player.initialsprite+10
+  elseif player.isgrounded and player.dx == 0 then
+    player.sprite = player.initialsprite
+  elseif player.isgrounded and not (player.dx == 0) then
+    animate_player()
+  else
+    player.sprite = player.initialsprite+9
+  end
+end
+
+function player_ground_movement()
   if (btn(0) or btn(1)) and not(btn(0) and btn(1)) then
     if btn(0) then --left
       player.skidding=player.dx > 0
@@ -144,7 +175,7 @@ function updateplayer()
       if btn(0) and btn(1) then
         player.dx -= player.skiddecel
       else
-        player.dx -= player.decel
+        player.dx -= player.grounddecel
       end
       if player.dx < player.minvel then
         player.dx = 0
@@ -153,28 +184,46 @@ function updateplayer()
       if btn(0) and btn(1) then
         player.dx += player.skiddecel
       else
-        player.dx += player.decel
+        player.dx += player.grounddecel
       end
       if player.dx > -player.minvel then
         player.dx = 0
       end
     end
   end
+end
 
-  --move the player left/right
-  if not player.isdead then
-    player.x+=player.dx
-  end
-
-  if player.isdead then
-    player.flipsprite = false
-    player.sprite = player.initialsprite+10
-  elseif player.isgrounded and player.dx == 0 then
-    player.sprite = player.initialsprite
-  elseif player.isgrounded and not (player.dx == 0) then
-    animate_player()
-  else
-    player.sprite = player.initialsprite+9
+function player_air_movement()
+  if (btn(0) or btn(1)) and not(btn(0) and btn(1)) then
+    if btn(0) then -- left
+      if player.dx < 0 then -- Gain Momemntum
+        if player.dx > -maxwalk then
+          player.dx-=player.airaccel1
+        else
+          player.dx-=player.airaccel2
+        end
+      elseif player.dx > 0 then -- Lose Momentum
+        if player.dx < maxwalk then
+          player.dx-=player.airdecel1
+        else
+          player.dx-=player.airdecel2
+        end
+      end
+    elseif btn(1) then -- right
+      if player.dx < 0 then -- Lose Momentum
+        if player.dx > -maxwalk then
+          player.dx+=player.airaccel1
+        else
+          player.dx+=player.airaccel2
+        end
+      elseif player.dx > 0 then -- Gain Momentum
+        if player.dx < maxwalk then
+          player.dx+=player.airdecel1
+        else
+          player.dx+=player.airdecel2
+        end
+      end
+    end
   end
 end
 

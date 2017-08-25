@@ -16,6 +16,14 @@ x speed      | y Vel  | Holding Grav | Falling Grav |
 
 
 Air physics
-x speed  | Gain momentum   | Lose momentum   |
-< 1.5625 | 0.03515265      | 0.0546875       |
-> 1.5625 | 0.0546875       | 0.05078125      |
+   Gain Momentum
+      x speed  | acceleration |
+      < 1.5625 | 0.03515265   |
+      > 1.5625 | 0.0546875    |
+
+   Lose momentum
+      x speed                                | deceleration |
+      x >= 1.5625                            | 0.0546875    |
+      x <= 1.5625 & started_jump >= 1.8125   | 0.05078125   |
+      x < 1.5625 & started_jump < 1.8125     | 0.05078125   |
+
