@@ -14,36 +14,27 @@ k=
 cam=
 {
   x = 0,
-  y = 16*8,
+  y = 0,
 }
 
 -- input
+keys=
+{
+  left=0,
+  right=1,
+  up=2,
+  down=3,
+  z=4,
+  x=5,
+}
 held_keys=
 {
-  left=false,
-  right=false,
-  up=false,
-  down=false,
-  z=false,
-  x=false,
 }
 pressed_keys=
 {
-  left=false,
-  right=false,
-  up=false,
-  down=false,
-  z=false,
-  x=false,
 }
 released_keys=
 {
-  left=false,
-  right=false,
-  up=false,
-  down=false,
-  z=false,
-  x=false,
 }
 
 --player
@@ -90,8 +81,6 @@ player=
 
   --flags
   isgrounded=false,
-  jumpheld=false,
-  jumpstillheld=false,
   isrunning=false,
   skidding=false,
   isdead=false,
@@ -106,20 +95,24 @@ player=
 }
 
 function _init()
-   palt(0, false)
-   palt(14, true)
-   player.x = 32
-   player.y = 8*20
-   cam.x = player.x-32
-   camera(0,0)
+  palt(0, false)
+  palt(14, true)
+  player.x = 32
+  player.y = 104
+  cam.x = player.x-32
+  camera(0,0)
+end
+
+function die()
+  player.isdead = true
 end
 
 -- set up the input buffer
 function updateinput()
   for key=0,5 do
-    released_keys[key+1] = not btn(key) and held_keys[key+1]
-    pressed_keys[key+1] = btn(key) and not held_keys[key+1]
-    held_keys[key+1] = btn(key)
+    released_keys[key] = not btn(key) and held_keys[key]
+    pressed_keys[key] = btn(key) and not held_keys[key]
+    held_keys[key] = btn(key)
   end
 end
 
@@ -127,9 +120,9 @@ end
 function updateplayer()
   -- run
   --
-  if btn(4) and player.isgrounded then
+  if held_keys[keys.x] and player.isgrounded then
     player.isrunning = true
-  elseif not btn(4) and player.isgrounded then
+  elseif not held_keys[keys.x] and player.isgrounded then
     player.isrunning = false
   end
 
@@ -306,9 +299,15 @@ function _update()
     if fget(v,0) or fget(w, 0) then
       --they hit a wall so move them back to the edge of the wall
       if (player.dx > 0) then
-        player.x = flr((player.x)/8)*8
+        printh(player.dx)
+        player.x=flr((player.x)/8)*8
+        player.dx=0
+        printh(player.dx)
       else
-        player.x = flr((player.x + 8)/8)*8
+        printh(player.dx)
+        player.x=flr((player.x + 8)/8)*8
+        player.dx=0
+        printh(player.dx)
       end
     end
   end
@@ -327,7 +326,7 @@ function _update()
   if player.isdead and not player.isdying then
     player.isdying=true
     player.dy=-player.deathjumpvel
-  elseif btn(5) and player.isgrounded and not player.jumpstillheld and not player.isdead then
+  elseif pressed_keys[keys.z] and player.isgrounded and not player.isdead then
     --launch the player upwards
     player.initjumpdx = abs(player.dx)
     if player.initjumpdx > 2.3125 then
@@ -335,9 +334,7 @@ function _update()
     else
       player.dy=-player.jumpvel1
     end
-    player.jumpheld = true
-    player.jumpstillheld = true
-  elseif btn(5) and player.jumpheld and player.dy < 0 then
+  elseif held_keys[keys.z] and player.dy < 0 then
     if player.initjumpdx < 1 then
       player.dy+=player.jumpinggrav1
     elseif player.initjumpdx < 2.3125 then
@@ -351,8 +348,7 @@ function _update()
       --player.jump_buffered=true
     --end
   else
-    player.jumpheld = false
-      player.jump_buffered=false
+    player.jump_buffered=false
     if player.isdead and player.dy < 0 then
       player.dy+=player.deathgravity1
     elseif player.isdead and player.dy >= 0 then
@@ -366,9 +362,6 @@ function _update()
     end
   end
 
-  if not btn(5) and player.isgrounded then
-    player.jumpstillheld = false
-  end
 
   --accumulate gravity
   player.dy = min(player.dy,player.termvel)
