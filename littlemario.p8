@@ -74,10 +74,11 @@ player=
   skiddecel = 0.1015625*2,
 
   -- momentum changes in the x direction
-  airaccel1=0.03515265*2,
-  airaccel2=0.0546875*2,
-  airdecel1=0.0546875*2,
+  airaccel1=0.037109375*2,
+  airaccel2=0.056640625*2,
+  airdecel1=0.056640625*2,
   airdecel2=0.05078125*2,
+  airdecel3=0.037109375*2,
 
   --flags
   isgrounded=false,
@@ -241,18 +242,22 @@ function player_air_movement()
           player.dx-=player.airaccel2
         end
       elseif player.dx > 0 then -- lose momentum
-        if player.dx < player.maxwalk then
+        if player.dx >= player.maxwalk then
           player.dx-=player.airdecel1
-        else
+        elseif player.dx < player.maxwalk and player.initjumpdx >= 1.8125 then
           player.dx-=player.airdecel2
+        elseif player.dx < player.maxwalk and player.initjumpdx < 1.8125 then
+          player.dx-=player.airdecel3
         end
       end
     elseif btn(1) then -- right
       if player.dx < 0 then -- lose momentum
-        if player.dx > -player.maxwalk then
+        if player.dx <= -player.maxwalk then
           player.dx+=player.airdecel1
-        else
+        elseif player.dx > -player.maxwalk and player.initjumpdx <= -1.8125 then
           player.dx+=player.airdecel2
+        elseif player.dx > -player.maxwalk and player.initjumpdx > -1.8125 then
+          player.dx+=player.airdecel3
         end
       elseif player.dx >= 0 then -- gain momentum
         if player.dx < player.maxwalk then
