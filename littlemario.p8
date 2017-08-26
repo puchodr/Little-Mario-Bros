@@ -101,6 +101,8 @@ function _init()
   player.y = 104
   cam.x = player.x-32
   camera(0,0)
+  printh('STARTING')
+  printh('STARTING')
 end
 
 function die()
@@ -246,17 +248,17 @@ function player_air_movement()
         end
       end
     elseif btn(1) then -- right
-      if player.dx <= 0 then -- lose momentum
+      if player.dx < 0 then -- lose momentum
         if player.dx > -player.maxwalk then
-          player.dx+=player.airaccel1
-        else
-          player.dx+=player.airaccel2
-        end
-      elseif player.dx > 0 then -- gain momentum
-        if player.dx < player.maxwalk then
           player.dx+=player.airdecel1
         else
           player.dx+=player.airdecel2
+        end
+      elseif player.dx >= 0 then -- gain momentum
+        if player.dx < player.maxwalk then
+          player.dx+=player.airaccel1
+        else
+          player.dx+=player.airaccel2
         end
       end
     end
@@ -299,11 +301,15 @@ function _update()
     if fget(v,0) or fget(w, 0) then
       --they hit a wall so move them back to the edge of the wall
       if (player.dx > 0) then
+        printh(player.dx)
         player.x=flr((player.x)/8)*8
-        player.dx=0
+        --@Todo: Figure out a better values for max speed while colliding
+        player.dx=min(player.maxwalk/4.7, player.dx)
       else
+        printh(player.dx)
         player.x=flr((player.x + 8)/8)*8
-        player.dx=0
+        --@Todo: Figure out a better values for max speed while colliding
+        player.dx=max(-player.maxwalk/4.7, player.dx)
       end
     end
   end
