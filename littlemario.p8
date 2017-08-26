@@ -299,15 +299,11 @@ function _update()
     if fget(v,0) or fget(w, 0) then
       --they hit a wall so move them back to the edge of the wall
       if (player.dx > 0) then
-        printh(player.dx)
         player.x=flr((player.x)/8)*8
         player.dx=0
-        printh(player.dx)
       else
-        printh(player.dx)
         player.x=flr((player.x + 8)/8)*8
         player.dx=0
-        printh(player.dx)
       end
     end
   end
@@ -323,11 +319,14 @@ function _update()
 
   --jump
   --
+  player.jump_buffered=pressed_keys[keys.z] or
+      (player.jump_buffered and held_keys[keys.z])
   if player.isdead and not player.isdying then
     player.isdying=true
     player.dy=-player.deathjumpvel
-  elseif pressed_keys[keys.z] and player.isgrounded and not player.isdead then
+  elseif (pressed_keys[keys.z] or player.jump_buffered) and player.isgrounded and not player.isdead then
     --launch the player upwards
+    player.jump_buffered=false
     player.initjumpdx = abs(player.dx)
     if player.initjumpdx > 2.3125 then
       player.dy=-player.jumpvel2
@@ -342,13 +341,7 @@ function _update()
     else
       player.dy+=player.jumpinggrav3
     end
-  -- @todo: come back to this and implement jump buffering
-  --elseif btn(5) and not player.isdead then
-    --if not player.jump_buffered then
-      --player.jump_buffered=true
-    --end
   else
-    player.jump_buffered=false
     if player.isdead and player.dy < 0 then
       player.dy+=player.deathgravity1
     elseif player.isdead and player.dy >= 0 then
@@ -362,6 +355,13 @@ function _update()
     end
   end
 
+  if (player.jump_buffered) then
+    player.jump_buff_frames+=1
+    if player.jump_buff_frames > 3 then
+      player.jump_buffered=false
+      player.jump_buff_frames = 0
+    end
+  end
 
   --accumulate gravity
   player.dy = min(player.dy,player.termvel)
