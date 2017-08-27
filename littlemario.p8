@@ -87,6 +87,11 @@ player=
   initialsprite = 32,
   sprite = 32,
   flipsprite=false,
+
+  -- meta
+  num_lives=5,
+  num_coins=88,
+  score=22789,
 }
 
 --globals
@@ -97,8 +102,10 @@ k=
   player_icon=player.sprite+11,
   coin_icon=44,
   clock_icon=45,
-  time_remaining=100,
+  time_remaining=399,
   time_frame_count=1,
+  world=1,
+  level=1,
 }
 
 function _init()
@@ -131,6 +138,11 @@ function updateplayer()
   --
   if (k.time_remaining <= 0) then
     die()
+  end
+
+  if (player.num_coins > 99) then
+    player.num_lives += 1
+    player.num_coins = 0
   end
 
   if held_keys[keys.x] and player.isgrounded then
@@ -468,20 +480,47 @@ function draw_ui()
   local x = cam.x+1
   spr(k.player_icon, x, cam.y+1, 1, 1, false, false)
   x += 9
-  print('03', x, cam.y+3, 7)
-
-  x += 11
-  spr(k.coin_icon, x, cam.y+1, 1, 1, false, false)
-  x += 8
-  print('74', x, cam.y+3, 7)
+  if player.num_lives < 10 then
+    print('0', x, cam.y+3, 7)
+    print(player.num_lives, x+4, cam.y+3, 7)
+  else
+    print(min(99,player.num_lives), x, cam.y+3, 7)
+  end
 
   x += 12
-  print('000460', x, cam.y+3, 7)
+  spr(k.coin_icon, x, cam.y+1, 1, 1, false, false)
+  x += 8
+  if player.num_coins < 10 then
+    print('0', x, cam.y+3, 7)
+    print(player.num_coins, x+4, cam.y+3, 7)
+  else
+    print(min(99,player.num_coins), x, cam.y+3, 7)
+  end
 
-  x += 28
-  print('world 1-1', x, cam.y+3, 7)
+  x += 13
+  if player.score < 10 then
+    print('0000', x, cam.y+3, 7)
+    print(player.score, x+16, cam.y+3, 7)
+  elseif player.score < 100 then
+    print('000', x, cam.y+3, 7)
+    print(player.score, x+12, cam.y+3, 7)
+  elseif player.score < 1000 then
+    print('00', x, cam.y+3, 7)
+    print(player.score, x+8, cam.y+3, 7)
+  elseif player.score < 10000 then
+    print('0', x, cam.y+3, 7)
+    print(player.score, x+4, cam.y+3, 7)
+  else
+    print(player.score, x, cam.y+3, 7)
+  end
 
-  x += 38
+  x += 25
+  print('world', x, cam.y+3, 7)
+  print(k.world, x+24, cam.y+3, 7)
+  print('-', x+28, cam.y+3, 7)
+  print(k.level, x+32, cam.y+3, 7)
+
+  x += 39
   spr(k.clock_icon, x, cam.y+1, 1, 1, false, false)
   x += 8
   if k.time_remaining < 10 then
