@@ -97,7 +97,7 @@ k=
   player_icon=player.sprite+11,
   coin_icon=44,
   clock_icon=45,
-  time_remaining=399,
+  time_remaining=100,
   time_frame_count=1,
 }
 
@@ -484,9 +484,17 @@ function draw_ui()
   x += 38
   spr(k.clock_icon, x, cam.y+1, 1, 1, false, false)
   x += 8
-  print(k.time_remaining, x, cam.y+3, 7)
+  if k.time_remaining < 10 then
+    print('00', x, cam.y+3, 7)
+    print(k.time_remaining, x+8, cam.y+3, 7)
+  elseif k.time_remaining < 100 then
+    print('0', x, cam.y+3, 7)
+    print(k.time_remaining, x+4, cam.y+3, 7)
+  else
+    print(k.time_remaining, x, cam.y+3, 7)
+  end
 
-  if k.time_frame_count%18 == 0 then
+  if k.time_frame_count%18 == 0 and not player.isdead then
     k.time_remaining-=1
     k.time_frame_count=0
   end
