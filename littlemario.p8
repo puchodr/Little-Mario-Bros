@@ -97,7 +97,7 @@ k=
   player_icon=player.sprite+11,
   coin_icon=44,
   clock_icon=45,
-  time_remaining=15,
+  time_remaining=399,
   time_frame_count=1,
 }
 
@@ -470,20 +470,23 @@ function draw_ui()
   x += 9
   print('03', x, cam.y+3, 7)
 
-  x += 14+8
+  x += 11
   spr(k.coin_icon, x, cam.y+1, 1, 1, false, false)
   x += 8
   print('74', x, cam.y+3, 7)
 
-  x += 16+10
+  x += 12
   print('000460', x, cam.y+3, 7)
 
-  x += 36+5
+  x += 28
+  print('world 1-1', x, cam.y+3, 7)
+
+  x += 38
   spr(k.clock_icon, x, cam.y+1, 1, 1, false, false)
   x += 8
   print(k.time_remaining, x, cam.y+3, 7)
 
-  if k.time_frame_count%20 == 0 then
+  if k.time_frame_count%18 == 0 then
     k.time_remaining-=1
     k.time_frame_count=0
   end
