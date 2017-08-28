@@ -89,7 +89,7 @@ player=
   flipsprite=false,
 
   -- meta
-  num_lives=2,
+  num_lives=1,
   num_coins=0,
   score=0,
 }
@@ -110,11 +110,13 @@ game=
   respawn_time=0,
   respawn=false,
   game_over=false,
+  game_over_time=0,
 }
 
 function _init()
   palt(0, false)
   palt(14, true)
+
   player.x=32
   player.y=104
   player.dx=0
@@ -122,13 +124,27 @@ function _init()
   player.isgrounded=true
   player.isdead=false
   player.isdying=false
+
   game.respawn_time=game.fps*6
   game.respawn=false
   game.time_remaining=100
+  game.game_over_time=game.fps*6
+
   cam.x = player.x-32
   camera(0,0)
+
   printh('starting')
   printh('starting')
+end
+
+function hard_init()
+  player.num_lives=1
+  player.num_coins=0
+  player.score=0
+  game.level=1
+  game.world=1
+  game.game_over=false
+  _init()
 end
 
 function die()
@@ -154,9 +170,7 @@ function updateplayer()
 
   if player.isdead then
     if game.respawn_time <= 0 then
-      if not game.game_over then
       _init()
-      end
     elseif game.respawn_time <= game.fps*3 and not game.respawn then
       player.num_lives-=1
       game.respawn=true
@@ -336,145 +350,152 @@ function player_air_movement()
 end
 
 function _update()
-  updateinput()
-  updateplayer()
-  --hit side walls
-  --
-
-  --check for walls in the
-  --direction we are moving.
-  if not player.isdead then
-    local xoffset=0
-    if player.dx > 0 then xoffset = 8 end
-
-    --look for a wall
-    local x = (player.x + xoffset) / game.tile_size
-    local y1 = (player.y + 0) / game.tile_size
-    local y2 = (player.y + 7) / game.tile_size
-    local v = mget(x, y1)
-    local w = mget(x, y2)
-
-    if fget(v,0) or fget(w, 0) then
-      --they hit a wall so move them back to the edge of the wall
-      if (player.dx > 0) then
-        player.x=flr((player.x)/8)*8
-        --@Todo: figure out a better values for max speed while colliding
-        player.dx=min(player.maxwalk/4.7, player.dx)
-      else
-        player.x=flr((player.x + 8)/8)*8
-        --@Todo: figure out a better values for max speed while colliding
-        player.dx=max(-player.maxwalk/4.7, player.dx)
-      end
+  if game.game_over then
+    if game.game_over_time <= 0 then
+      hard_init()
     end
-  end
-
-  if player.x < cam.x then
-    player.x=cam.x
-  end
-
-  local temp = player.x-32
-  --if temp > cam.x then
-    cam.x = temp
-  --end
-
-  --jump
-  --
-  player.jump_buffered=pressed_keys[keys.z] or
-      (player.jump_buffered and held_keys[keys.z])
-  if player.isdead and not player.isdying then
-    player.isdying=true
-    player.dy=-player.deathjumpvel
-  elseif (pressed_keys[keys.z] or player.jump_buffered) and player.isgrounded and not player.isdead then
-    --launch the player upwards
-    player.jump_buffered=false
-    player.initjumpdx = abs(player.dx)
-    if player.initjumpdx > 2.3125 then
-      player.dy=-player.jumpvel2
-    else
-      player.dy=-player.jumpvel1
-    end
-  elseif held_keys[keys.z] and player.dy < 0 then
-    if player.initjumpdx < 1 then
-      player.dy+=player.jumpinggrav1
-    elseif player.initjumpdx < 2.3125 then
-      player.dy+=player.jumpinggrav2
-    else
-      player.dy+=player.jumpinggrav3
-    end
+    game.game_over_time-=1
   else
-    if player.isdead and player.dy < 0 then
-      player.dy+=player.deathgravity1
-    elseif player.isdead and player.dy >= 0 then
-      player.dy+=player.deathgravity2
-    elseif player.initjumpdx < 1 then
-      player.dy+=player.fallinggrav1
-    elseif player.initjumpdx < 2.3125 then
-      player.dy+=player.fallinggrav2
-    else
-      player.dy+=player.fallinggrav3
-    end
-  end
-
-  if (player.jump_buffered) then
-    player.jump_buff_frames+=1
-    if player.jump_buff_frames > 3 then
-      player.jump_buffered=false
-      player.jump_buff_frames = 0
-    end
-  end
-
-  --accumulate gravity
-  player.dy = min(player.dy,player.termvel)
-
-  --fall
-  player.y += player.dy
-
-  --hit floor
-  --
-
-  if not player.isdead then
-    --check bottom of the player.
-    v=mget((player.x+1)/8,(player.y+8)/8)
-    w=mget((player.x+6)/8,(player.y+8)/8)
-
-    --assume they are floating
-    --until we determine otherwise
-    player.isgrounded=false
-
-    --only check for floors when
-    --moving downward
-    if player.dy>=0 then
-      --look for a solid tile
-      if fget(v,0) or fget(w,0) then
-        --place player on top of tile
-        player.y = flr((player.y)/8)*8
-        --halt velocity
-        player.dy = 0
-        --allow jumping again
-        player.isgrounded=true
-      end
-      if fget(v,1) or fget(w,1) then --fell into pit
-        die()
-      end
-    end
-
-    --hit ceiling
+    updateinput()
+    updateplayer()
+    --hit side walls
     --
 
-    --check top center of player
-    v=mget((player.x+2)/8,(player.y)/8)
-    w=mget((player.x+6)/8,(player.y)/8)
+    --check for walls in the
+    --direction we are moving.
+    if not player.isdead then
+      local xoffset=0
+      if player.dx > 0 then xoffset = 8 end
 
-    --only check for ceilings when
-    --moving up
-    if player.dy<=0 then
-      --look for solid tile
-      if fget(v,0) or fget(w,0) then
-        --position player right below
-        --ceiling
-        player.y = flr((player.y+8)/8)*8
-        --halt upward velocity
-        player.dy = 0
+      --look for a wall
+      local x = (player.x + xoffset) / game.tile_size
+      local y1 = (player.y + 0) / game.tile_size
+      local y2 = (player.y + 7) / game.tile_size
+      local v = mget(x, y1)
+      local w = mget(x, y2)
+
+      if fget(v,0) or fget(w, 0) then
+        --they hit a wall so move them back to the edge of the wall
+        if (player.dx > 0) then
+          player.x=flr((player.x)/8)*8
+          --@Todo: figure out a better values for max speed while colliding
+          player.dx=min(player.maxwalk/4.7, player.dx)
+        else
+          player.x=flr((player.x + 8)/8)*8
+          --@Todo: figure out a better values for max speed while colliding
+          player.dx=max(-player.maxwalk/4.7, player.dx)
+        end
+      end
+    end
+
+    if player.x < cam.x then
+      player.x=cam.x
+    end
+
+    local temp = player.x-32
+    --if temp > cam.x then
+      cam.x = temp
+    --end
+
+    --jump
+    --
+    player.jump_buffered=pressed_keys[keys.z] or
+        (player.jump_buffered and held_keys[keys.z])
+    if player.isdead and not player.isdying then
+      player.isdying=true
+      player.dy=-player.deathjumpvel
+    elseif (pressed_keys[keys.z] or player.jump_buffered) and player.isgrounded and not player.isdead then
+      --launch the player upwards
+      player.jump_buffered=false
+      player.initjumpdx = abs(player.dx)
+      if player.initjumpdx > 2.3125 then
+        player.dy=-player.jumpvel2
+      else
+        player.dy=-player.jumpvel1
+      end
+    elseif held_keys[keys.z] and player.dy < 0 then
+      if player.initjumpdx < 1 then
+        player.dy+=player.jumpinggrav1
+      elseif player.initjumpdx < 2.3125 then
+        player.dy+=player.jumpinggrav2
+      else
+        player.dy+=player.jumpinggrav3
+      end
+    else
+      if player.isdead and player.dy < 0 then
+        player.dy+=player.deathgravity1
+      elseif player.isdead and player.dy >= 0 then
+        player.dy+=player.deathgravity2
+      elseif player.initjumpdx < 1 then
+        player.dy+=player.fallinggrav1
+      elseif player.initjumpdx < 2.3125 then
+        player.dy+=player.fallinggrav2
+      else
+        player.dy+=player.fallinggrav3
+      end
+    end
+
+    if (player.jump_buffered) then
+      player.jump_buff_frames+=1
+      if player.jump_buff_frames > 3 then
+        player.jump_buffered=false
+        player.jump_buff_frames = 0
+      end
+    end
+
+    --accumulate gravity
+    player.dy = min(player.dy,player.termvel)
+
+    --fall
+    player.y += player.dy
+
+    --hit floor
+    --
+
+    if not player.isdead then
+      --check bottom of the player.
+      v=mget((player.x+1)/8,(player.y+8)/8)
+      w=mget((player.x+6)/8,(player.y+8)/8)
+
+      --assume they are floating
+      --until we determine otherwise
+      player.isgrounded=false
+
+      --only check for floors when
+      --moving downward
+      if player.dy>=0 then
+        --look for a solid tile
+        if fget(v,0) or fget(w,0) then
+          --place player on top of tile
+          player.y = flr((player.y)/8)*8
+          --halt velocity
+          player.dy = 0
+          --allow jumping again
+          player.isgrounded=true
+        end
+        if fget(v,1) or fget(w,1) then --fell into pit
+          die()
+        end
+      end
+
+      --hit ceiling
+      --
+
+      --check top center of player
+      v=mget((player.x+2)/8,(player.y)/8)
+      w=mget((player.x+6)/8,(player.y)/8)
+
+      --only check for ceilings when
+      --moving up
+      if player.dy<=0 then
+        --look for solid tile
+        if fget(v,0) or fget(w,0) then
+          --position player right below
+          --ceiling
+          player.y = flr((player.y+8)/8)*8
+          --halt upward velocity
+          player.dy = 0
+        end
       end
     end
   end
