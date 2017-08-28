@@ -89,7 +89,7 @@ player=
   flipsprite=false,
 
   -- meta
-  num_lives=1,
+  num_lives=2,
   num_coins=0,
   score=0,
 }
@@ -109,7 +109,7 @@ game=
   level=1,
   respawn_time=0,
   respawn=false,
-  game_over=true,
+  game_over=false,
 }
 
 function _init()
@@ -122,8 +122,9 @@ function _init()
   player.isgrounded=true
   player.isdead=false
   player.isdying=false
-  game.respawn_time=game.fps*5
+  game.respawn_time=game.fps*6
   game.respawn=false
+  game.time_remaining=100
   cam.x = player.x-32
   camera(0,0)
   printh('starting')
@@ -152,9 +153,11 @@ function updateplayer()
   end
 
   if player.isdead then
-    if game.respawn_time <= 0 and not player.game_over then
+    if game.respawn_time <= 0 then
+      if not game.game_over then
       _init()
-    elseif game.respawn_time <= game.fps*2 and not game.respawn then
+      end
+    elseif game.respawn_time <= game.fps*3 and not game.respawn then
       player.num_lives-=1
       game.respawn=true
 
@@ -167,8 +170,8 @@ function updateplayer()
   end
 
   if (player.num_coins > 99) then
-    player.num_lives += 1
-    player.num_coins = 0
+    player.num_lives+=1
+    player.num_coins=0
   end
 
   if held_keys[keys.x] and player.isgrounded then
@@ -584,13 +587,13 @@ function draw_ui()
 end
 
 function draw_game_over()
-  print ('game over', 47, 62, 5)
-  print ('game over', 46, 61, 7)
+  print ('game over', cam.x+47, cam.y+62, 5)
+  print ('game over', cam.x+46, cam.y+61, 7)
 end
 
 function draw_respawn()
-  local x=44
-  local y=54
+  local x=cam.x+44
+  local y=cam.y+54
 
   print ('world', x+1, y+1, 5)
   print(game.world, x+25, y+1, 5)
@@ -602,8 +605,8 @@ function draw_respawn()
   print('-', x+28, y, 7)
   print(game.level, x+32, y, 7)
 
-  x = 46
-  y = 68
+  x = cam.x+46
+  y = cam.y+68
   spr(player.initialsprite, x, y, 1, 1, false, false)
   x += 14
   y += 1
