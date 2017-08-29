@@ -138,7 +138,7 @@ function _init()
 end
 
 function hard_init()
-  player.num_lives=1
+  player.num_lives=3
   player.num_coins=0
   player.score=0
   game.level=1
