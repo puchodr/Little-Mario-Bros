@@ -89,7 +89,7 @@ player=
   flipsprite=false,
 
   -- meta
-  num_lives=1,
+  num_lives=3,
   num_coins=0,
   score=0,
 }
