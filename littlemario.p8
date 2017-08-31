@@ -486,8 +486,8 @@ function _update()
       --
 
       --check top center of player
-      v=mget((player.x+2)/8,(player.y)/8)
-      w=mget((player.x+5)/8,(player.y)/8)
+      v=mget((player.x+2.5)/8,(player.y)/8)
+      w=mget((player.x+4.5)/8,(player.y)/8)
 
       --only check for ceilings when
       --moving up
