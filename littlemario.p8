@@ -127,7 +127,7 @@ function _init()
 
   game.respawn_time=game.fps*6
   game.respawn=false
-  game.time_remaining=100
+  game.time_remaining=900
   game.game_over_time=game.fps*6
 
   cam.x = player.x-32
@@ -218,8 +218,9 @@ function updateplayer()
 end
 
 function player_ground_movement()
-  if (btn(0) or btn(1)) and not(btn(0) and btn(1)) then
-    if btn(0) then --left
+  if (held_keys[keys.left] or held_keys[keys.right]) and
+      not(held_keys[keys.left] and held_keys[keys.right]) then
+    if held_keys[keys.left] then --left
       player.skidding=player.dx > 0
       if player.isrunning then
         player.dx-=player.runaccel
@@ -246,7 +247,7 @@ function player_ground_movement()
         end
       end
       player.flipsprite = true
-    elseif btn(1) then --right
+    elseif held_keys[keys.right] then --right
       player.skidding=player.dx < 0
       if player.isrunning then
         player.dx+=player.runaccel
@@ -276,7 +277,7 @@ function player_ground_movement()
     end
   else
     if player.dx > 0 then
-      if btn(0) and btn(1) then
+      if held_keys[keys.left] and held_keys[keys.right] then
         player.dx -= player.skiddecel
       else
         player.dx -= player.grounddecel
@@ -285,7 +286,7 @@ function player_ground_movement()
         player.dx = 0
       end
     elseif player.dx < 0 then
-      if btn(0) and btn(1) then
+      if held_keys[keys.left] and held_keys[keys.right] then
         player.dx += player.skiddecel
       else
         player.dx += player.grounddecel
@@ -298,8 +299,9 @@ function player_ground_movement()
 end
 
 function player_air_movement()
-  if (btn(0) or btn(1)) and not(btn(0) and btn(1)) then
-    if btn(0) then -- left
+  if (held_keys[keys.left] or held_keys[keys.right]) and
+      not(held_keys[keys.left] and held_keys[keys.right]) then
+    if held_keys[keys.left] then --left
       if player.dx <= 0 then -- gain momemntum
         if player.dx > -player.maxwalk then
           player.dx-=player.airaccel1
@@ -315,7 +317,7 @@ function player_air_movement()
           player.dx-=player.airdecel3
         end
       end
-    elseif btn(1) then -- right
+    elseif held_keys[keys.right] then -- right
       if player.dx < 0 then -- lose momentum
         if player.dx <= -player.maxwalk then
           player.dx+=player.airdecel1
@@ -365,26 +367,28 @@ function _update()
     --direction we are moving.
     if not player.isdead then
       local xoffset=0
-      if player.dx > 0 then xoffset = 8 end
+      if player.flipsprite then xoffset = 8 end
 
       --look for a wall
-      local x = (player.x + xoffset) / game.tile_size
-      local y1 = (player.y + 0) / game.tile_size
+      local x1 = player.x / game.tile_size
+      local y1 = player.y / game.tile_size
+      local x2 = (player.x + 7) / game.tile_size
       local y2 = (player.y + 7) / game.tile_size
-      local v = mget(x, y1)
-      local w = mget(x, y2)
+      local top_left = mget(x1, y1)
+      local bot_left = mget(x1, y2)
+      local top_right = mget(x2, y1)
+      local bot_right = mget(x2, y2)
 
-      if fget(v,0) or fget(w, 0) then
-        --they hit a wall so move them back to the edge of the wall
-        if (player.dx > 0) then
-          player.x=flr((player.x)/8)*8
-          --@Todo: figure out a better values for max speed while colliding
-          player.dx=min(player.maxwalk/4.7, player.dx)
-        else
-          player.x=flr((player.x + 8)/8)*8
-          --@Todo: figure out a better values for max speed while colliding
-          player.dx=max(-player.maxwalk/4.7, player.dx)
-        end
+      if fget(top_left,0) or fget(bot_left, 0) then
+        --they hit a wall on their left side, so move them to the right side of what they're colliding with
+        player.x=flr((player.x + 8)/8)*8
+        --@Todo: figure out a better values for max speed while colliding
+        player.dx=max(-player.maxwalk/4.7, player.dx)
+      end
+      if fget(top_right,0) or fget(bot_right, 0) then
+        player.x=flr((player.x)/8)*8
+        --@Todo: figure out a better values for max speed while colliding
+        player.dx=min(player.maxwalk/4.7, player.dx)
       end
     end
 
@@ -454,8 +458,8 @@ function _update()
 
     if not player.isdead then
       --check bottom of the player.
-      v=mget((player.x+1)/8,(player.y+8)/8)
-      w=mget((player.x+6)/8,(player.y+8)/8)
+      v=mget((player.x+0.5)/8,(player.y+8)/8)
+      w=mget((player.x+6.5)/8,(player.y+8)/8)
 
       --assume they are floating
       --until we determine otherwise
@@ -483,7 +487,7 @@ function _update()
 
       --check top center of player
       v=mget((player.x+2)/8,(player.y)/8)
-      w=mget((player.x+6)/8,(player.y)/8)
+      w=mget((player.x+5)/8,(player.y)/8)
 
       --only check for ceilings when
       --moving up
