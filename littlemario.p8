@@ -81,6 +81,7 @@ player=
   isdead=false,
   isdying=false,
   jump_buffered=false,
+  stop_run_frames=0,
   jump_buff_frames=0,
 
   --animation variables
@@ -133,7 +134,6 @@ function _init()
   cam.x = player.x-32
   camera(0,0)
 
-  printh('starting')
   printh('starting')
 end
 
@@ -190,8 +190,12 @@ function updateplayer()
 
   if held_keys[keys.x] and player.isgrounded then
     player.isrunning = true
-  elseif not held_keys[keys.x] and player.isgrounded then
-    player.isrunning = false
+    player.stop_run_frames=0
+  elseif not held_keys[keys.x] and player.isrunning and player.isgrounded then
+    player.stop_run_frames+=1
+    if player.stop_run_frames >= 5 then
+      player.isrunning = false
+    end
   end
 
   if player.isgrounded then
@@ -382,24 +386,40 @@ function _update()
       if fget(top_left,0) or fget(bot_left, 0) then
         --they hit a wall on their left side, so move them to the right side of what they're colliding with
         player.x=flr((player.x + 8)/8)*8
-        --@Todo: figure out a better values for max speed while colliding
+        --@todo: figure out a better values for max speed while colliding
         player.dx=max(-player.maxwalk/4.7, player.dx)
       end
       if fget(top_right,0) or fget(bot_right, 0) then
         player.x=flr((player.x)/8)*8
-        --@Todo: figure out a better values for max speed while colliding
+        --@todo: figure out a better values for max speed while colliding
         player.dx=min(player.maxwalk/4.7, player.dx)
       end
     end
 
-    if player.x < cam.x then
-      player.x=cam.x
+    --if player.x < cam.x then
+      --player.x=cam.x
+    --end
+
+    local temp = cam.x
+    if player.flipsprite then
+      temp-=3
+      temp=max(temp, player.x-72)
+    else
+      temp+=3
+      temp=min(temp, player.x-48)
     end
 
-    local temp = player.x-32
+    temp = max(temp, 0)
+    temp = min(temp, 896)
     --if temp > cam.x then
       cam.x = temp
     --end
+
+    if player.x < cam.x then
+      player.x=cam.x
+    elseif player.x > cam.x+120 then
+      player.x=cam.x+120
+    end
 
     --jump
     --
