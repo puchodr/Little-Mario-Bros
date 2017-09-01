@@ -125,6 +125,7 @@ function _init()
   player.isgrounded=true
   player.isdead=false
   player.isdying=false
+  player.flipsprite=false
 
   game.respawn_time=game.fps*6
   game.respawn=false
@@ -210,7 +211,6 @@ function updateplayer()
   end
 
   if player.isdead then
-    player.flipsprite = false
     player.sprite = player.initialsprite+10
   elseif player.isgrounded and player.dx == 0 then
     player.sprite = player.initialsprite

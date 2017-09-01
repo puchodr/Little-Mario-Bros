@@ -6,6 +6,7 @@ This is meant to be a clone of the original Super Mario Bros. with PICO-8 size l
 * 0.1 - Collision, movement, and ability to jump.
 * 0.2 - Finer tuned movement, additional animations (jumping, skidding, etc.)
 * 0.3 - Jump Buffering, near 1:1 physics (Missing water physics and enemy bounce)
-* 0.4 - UI, minor death conditions, running animation based on speed and maybe coin collection.
-* 0.5 - Block animations (this might require a map overhaul)
-* 0.6 - To be continued..
+* 0.4 - UI, minor death conditions, running animation based on speed and camera overhaul.
+* 0.5 - Map overhaul to store maps as data to load on the fly.
+* 0.6 - Block animations and coin collection
+* 0.7 - Continue with either enemies or powerups (dreading the pixel art for big Mario/Luigi)
