@@ -9,6 +9,11 @@ cam=
 {
   x = 0,
   y = 0,
+  last_player_x=0,
+
+  --flags
+  transition=false,
+  reverse=false,
 }
 
 -- input
@@ -133,6 +138,8 @@ function _init()
   game.game_over_time=game.fps*6
 
   cam.x = player.x-32
+  cam.last_player_x = player.x
+
   camera(0,0)
 
   printh('starting')
@@ -401,12 +408,36 @@ function _update()
     --end
 
     local temp = cam.x
-    if player.flipsprite then
-      temp-=3
-      temp=max(temp, player.x-72)
+    if cam.reverse then
+      if cam.transition then
+        cam.last_player_x = max(cam.last_player_x,player.x)
+        temp-=3.5
+        temp=max(temp, player.x-72)
+        cam.transition = not (temp==(player.x-72))
+      else
+        cam.last_player_x = min(cam.last_player_x,player.x)
+        temp=cam.last_player_x-72
+      end
+
+      if player.x-cam.last_player_x > 8 then
+        cam.transition=true
+        cam.reverse=false
+      end
     else
-      temp+=3
-      temp=min(temp, player.x-48)
+      if cam.transition then
+        cam.last_player_x = min(cam.last_player_x,player.x)
+        temp+=3.5
+        temp=min(temp, player.x-48)
+        cam.transition = not (temp==player.x-48)
+      else
+        cam.last_player_x = max(cam.last_player_x,player.x)
+        temp=cam.last_player_x-48
+      end
+
+      if cam.last_player_x-player.x > 8 then
+        cam.transition=true
+        cam.reverse=true
+      end
     end
 
     temp = max(temp, 0)

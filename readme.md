@@ -10,3 +10,4 @@ This is meant to be a clone of the original Super Mario Bros. with PICO-8 size l
 * 0.5 - Map overhaul to store maps as data to load on the fly.
 * 0.6 - Block animations and coin collection
 * 0.7 - Continue with either enemies or powerups (dreading the pixel art for big Mario/Luigi)
+* 0.8 - To be continued...
